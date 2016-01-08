@@ -1,0 +1,67 @@
+list numberSelect = [ "d2e70260-3b6f-ab3e-6923-a26f49b9feb3", "5828972f-09cf-1b21-e7fb-d2e06712947b", "bcc40eed-1aaf-db55-8c19-89eee89b8121", "042037e4-4d64-c25d-9bdc-4f0d4e5036dc", "3782e16a-5a89-af56-edce-40fcd89a23b3", "567a729c-cc61-a7a1-30f8-32a4ebf0f21a", "d83d5a3f-deee-a3d2-98c9-cca676091fa4", "d947a8eb-21ba-48e9-0cf5-0e8d4c4d1077", "94c413b4-af9c-5e59-6ceb-64a187bdfaed", "6a6b023e-3120-8345-3394-9bef22fb0f86", "eec7041c-4d98-75c3-af94-b6849187469b", "400eeb7c-4097-e50c-4ee9-7c097cdbf75b" ];       // This is a list of the UUID's for the LED textures.
+
+integer hourCorrection = 12;
+
+SetClock()
+{
+    // Get both the current SL time and GMT.
+    integer sltSecs = (integer) llGetWallclock();               
+    integer diff    = (integer) llGetGMTclock() - sltSecs;      
+    string  PST_PDT = "Pacific Standard Time";                                   
+    // Determine PST/PDT
+    if (diff == 25200 || diff == -61200)         
+        PST_PDT = "Pacific Daylight Time";                         
+
+    integer mins  = sltSecs / 60;
+    integer hours = mins / 60;
+
+    mins = mins % 60;
+    
+    // Sets clock to a 12 hour clock
+    if (hours > 12)
+    {
+        hours -= hourCorrection;
+    }
+    
+    // Sets the Hour textures based on a 24 hour clock.
+    if (hours < 10)            
+    {
+        llSetLinkTexture(2, llList2String(numberSelect, 11), 6);
+        llSetLinkTexture(2, llList2String(numberSelect, hours), 5);
+    }
+    else if (hours >= 10 | hours <= 19)
+    {
+        string h1 = llGetSubString((string)hours, 0, 0);
+        string h2 = llGetSubString((string)hours, 1, 1);
+        llSetLinkTexture(2, llList2String(numberSelect, (integer)h1), 6);
+        llSetLinkTexture(2, llList2String(numberSelect, (integer)h2), 5);
+    }
+    
+    // Set the Minute textures
+    if (mins < 10)
+    {
+        llSetLinkTexture(3, llList2String(numberSelect, 0), 6);
+        llSetLinkTexture(3, llList2String(numberSelect, (integer)mins), 5);
+    }
+    else if (mins >= 10)
+    {
+        string min1 = llGetSubString((string)mins, 0, 0);
+        string min2 = llGetSubString((string)mins, 1, 1);
+        llSetLinkTexture(3, llList2String(numberSelect, (integer)min1), 6);
+        llSetLinkTexture(3, llList2String(numberSelect, (integer)min2), 5);
+    }
+    // Sets the floating text to say PST or PDT
+    llSetText(PST_PDT, <1,1,1> ,1);
+}
+
+default
+{
+    state_entry()
+    {
+        llSetTimerEvent(1);
+    }
+    timer()
+    {
+        SetClock();
+    }
+}
